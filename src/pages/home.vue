@@ -1,8 +1,12 @@
 <template>
-  <div class="flex items-center justify-center py-24 overflow-hidden flex-col">
+  <Header @load="loadArticles"></Header>
+  <div class="text-center w-full text-2xl font-bold py-2">
+    totalResults : {{ totalResults }}
+  </div>
+  <div class="flex items-center justify-center overflow-hidden flex-col">
     <div v-if="isLoading">
       <div
-        class="h-10 w-10 bg-gradient-to-r from-cyan-500 to-red-500 animate-spin rounded-full flex items-center justify-center"
+        class="h-10 w-10 bg-gradient-to-r from-cyan-500 my-24 to-red-500 animate-spin rounded-full flex items-center justify-center"
       >
         <div class="bg-white h-7 w-7 rounded-full"></div>
       </div>
@@ -44,11 +48,13 @@
               >{{ article.author }}</a
             >
           </div>
+
+          <div>📅 {{ formatDate(article.publishedAt) }}</div>
         </div>
       </div>
     </div>
     <div v-else>Data Not Found</div>
-    <div v-if="!isLoading && articles.length >= articlestoShow">
+    <div v-if="!isLoading && articles.length > articlestoShow">
       <button
         @click="loadMore"
         class="py-2 px-4 rounded-md bg-black text-white"
@@ -60,20 +66,34 @@
 </template>
 
 <script setup>
+import Header from "../components/header.vue";
 import { ref } from "vue";
 import axios from "axios";
+
+const formatDate = (data) => {
+  const date = new Date(data);
+  return date.toLocaleDateString("en-CA");
+};
 
 const articles = ref([]);
 const isLoading = ref(true);
 const articlestoShow = ref(9);
+const totalResults = ref(0);
+const dateRange = ref([
+  formatDate(new Date()),
+  formatDate(new Date(new Date().setDate(new Date().getDate() + 7))),
+]);
+const date = ref(Date());
 
 // Data Liasting Functionality
-const getDetails = async () => {
+const getDetails = async (search = "bitcoin", date = dateRange.value) => {
+  //   console.log(search);
   const response = await axios.get(
-    "https://newsapi.org/v2/everything?q=bitcoin&apiKey=984c6ffd475b4137bce0a7670278e3eb"
+    `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&pageSize=9&apiKey=984c6ffd475b4137bce0a7670278e3eb`
   );
   if (response.data && response.data.status == "ok") {
     console.log(response.data);
+    totalResults.value = response.data.totalResults;
     articles.value = response.data.articles;
     isLoading.value = false;
   } else {
@@ -86,6 +106,12 @@ setTimeout(() => {
   getDetails();
 }, 2000);
 
+const loadArticles = (search, date) => {
+  isLoading.value = true;
+  articles.value = [];
+  dateRange.value = [formatDate(date.value[0]), formatDate(date.value[1])];
+  getDetails(search.value);
+};
 // Load More Functionality
 
 const loadMore = () => {
