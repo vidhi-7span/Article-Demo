@@ -15,7 +15,7 @@
       <!-- {{ articles }} -->
       <div
         class="flex-shrink max-w-full w-full sm:w-1/3 px-3 pb-3 pt-3 sm:pt-0 border-b-2 sm:border-b-0 border-dotted border-gray-100"
-        v-for="(article, i) in articles"
+        v-for="(article, i) in articles.slice(0, articlestoShow)"
         :key="i"
       >
         <div class="flex flex-row sm:block hover-img">
@@ -48,6 +48,14 @@
       </div>
     </div>
     <div v-else>Data Not Found</div>
+    <div v-if="!isLoading && articles.length >= articlestoShow">
+      <button
+        @click="loadMore"
+        class="py-2 px-4 rounded-md bg-black text-white"
+      >
+        Load More
+      </button>
+    </div>
   </div>
 </template>
 
@@ -57,7 +65,9 @@ import axios from "axios";
 
 const articles = ref([]);
 const isLoading = ref(true);
+const articlestoShow = ref(9);
 
+// Data Liasting Functionality
 const getDetails = async () => {
   const response = await axios.get(
     "https://newsapi.org/v2/everything?q=bitcoin&apiKey=984c6ffd475b4137bce0a7670278e3eb"
@@ -70,7 +80,15 @@ const getDetails = async () => {
     console.error("Error");
   }
 };
+
+// Loading Functionality
 setTimeout(() => {
   getDetails();
-}, 2355);
+}, 2000);
+
+// Load More Functionality
+
+const loadMore = () => {
+  articlestoShow.value = articlestoShow.value + 9;
+};
 </script>
