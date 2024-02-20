@@ -28,7 +28,7 @@
           </button>
           <div class="py-0 sm:py-3 pl-3 sm:pl-0">
             <h3 class="text-lg font-bold leading-tight mb-2">
-              <a href="#">{{ article.title }}</a>
+              {{ article.title }}
             </h3>
             <p
               class="hidden md:block text-gray-600 leading-tight mb-1"
@@ -36,12 +36,8 @@
             >
               {{ article.description }}
             </p>
-            <a class="text-gray-500" href="#"
-              ><span
-                class="inline-block h-3 border-l-2 border-red-600 mr-2"
-              ></span
-              >{{ article.author }}</a
-            >
+            <span class="inline-block h-3 border-l-2 border-red-600 mr-2"></span
+            >{{ article.author }}
           </div>
 
           <div>📅 {{ formatDate(article.publishedAt) }}</div>
@@ -62,8 +58,8 @@
 </template>
 
 <script setup>
-import model from "../components/model.vue";
-import Header from "../components/header.vue";
+import model from "@/components/model.vue";
+import Header from "@/components/header.vue";
 import { ref, inject } from "vue";
 import axios from "axios";
 
@@ -91,9 +87,13 @@ const openModal = (item) => {
 };
 
 // Data Liasting Functionality
-const getDetails = async (search = "bitcoin", date = dateRange.value) => {
+const getDetails = async (
+  search = "bitcoin",
+  lang = "en",
+  date = dateRange.value
+) => {
   const response = await axios.get(
-    `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&pageSize=9&apiKey=984c6ffd475b4137bce0a7670278e3eb`
+    `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&language=${lang}&pageSize=9&apiKey=984c6ffd475b4137bce0a7670278e3eb`
   );
   if (response.data && response.data.status == "ok") {
     totalResults.value = response.data.totalResults;
@@ -109,11 +109,12 @@ setTimeout(() => {
   getDetails();
 }, 2000);
 
-const loadArticles = (search, date) => {
+const loadArticles = (search, date, lang) => {
+  console.log(search.value, date.value, lang.value);
   isLoading.value = true;
   articles.value = [];
   dateRange.value = [formatDate(date.value[0]), formatDate(date.value[1])];
-  getDetails(search.value);
+  getDetails(search.value, lang.value);
 };
 // Load More Functionality
 
