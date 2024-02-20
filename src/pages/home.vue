@@ -1,8 +1,6 @@
 <template>
-  <Header @load="loadArticles"></Header>
-  <div class="text-center w-full text-2xl font-bold py-2">
-    totalResults : {{ totalResults }}
-  </div>
+  <Header @load="loadArticles" :result="totalResults"></Header>
+
   <div class="flex items-center justify-center overflow-hidden flex-col">
     <div v-if="isLoading">
       <div
@@ -12,25 +10,22 @@
       </div>
     </div>
 
-    <div
-      class="flex flex-row flex-wrap -mx-3 container"
-      v-else-if="articles.length"
-    >
+    <div class="gap-6 grid grid-cols-3 container" v-else-if="articles.length">
       <!-- {{ articles }} -->
       <div
-        class="flex-shrink max-w-full w-full sm:w-1/3 px-3 pb-3 pt-3 sm:pt-0 border-b-2 sm:border-b-0 border-dotted border-gray-100"
+        class="flex-shrink max-w-full w-full px-3 pb-3 pt-3 sm:pt-0 border-b-2 sm:border-b-0 border-dotted rounded-md border-gray-100 shadow-md"
         v-for="(article, i) in articles.slice(0, articlestoShow)"
         :key="i"
       >
         <div class="flex flex-row sm:block hover-img">
-          <a href="">
+          <button @click="openModal(article)">
             <img
               v-if="article?.urlToImage"
               class="max-w-full w-full mx-auto aspect-video object-contain"
               :src="article.urlToImage"
               alt="alt title"
             />
-          </a>
+          </button>
           <div class="py-0 sm:py-3 pl-3 sm:pl-0">
             <h3 class="text-lg font-bold leading-tight mb-2">
               <a href="#">{{ article.title }}</a>
@@ -62,14 +57,17 @@
         Load More
       </button>
     </div>
+    <model :detail="modalDetail" />
   </div>
 </template>
 
 <script setup>
+import model from "../components/model.vue";
 import Header from "../components/header.vue";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import axios from "axios";
 
+const $global = inject("global");
 const formatDate = (data) => {
   const date = new Date(data);
   return date.toLocaleDateString("en-CA");
@@ -78,21 +76,26 @@ const formatDate = (data) => {
 const articles = ref([]);
 const isLoading = ref(true);
 const articlestoShow = ref(9);
+const modalDetail = ref(null);
 const totalResults = ref(0);
+
 const dateRange = ref([
   formatDate(new Date()),
-  formatDate(new Date(new Date().setDate(new Date().getDate() + 7))),
+  formatDate(new Date(new Date().setDate(new Date().getDate() - 7))),
 ]);
 const date = ref(Date());
 
+const openModal = (item) => {
+  modalDetail.value = item;
+  $global.$vayu.modal.open("detail-modal");
+};
+
 // Data Liasting Functionality
 const getDetails = async (search = "bitcoin", date = dateRange.value) => {
-  //   console.log(search);
   const response = await axios.get(
     `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&pageSize=9&apiKey=984c6ffd475b4137bce0a7670278e3eb`
   );
   if (response.data && response.data.status == "ok") {
-    console.log(response.data);
     totalResults.value = response.data.totalResults;
     articles.value = response.data.articles;
     isLoading.value = false;
