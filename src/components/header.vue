@@ -32,6 +32,12 @@
           <option value="sv">Swedish</option>
           <option value="zh">Chinese</option>
         </select>
+
+        <select v-model="sortby" class="border rounded-md px-1">
+          <option value="relevancy">Relevancy</option>
+          <option value="popularity">Popularity</option>
+          <option value="publishedAt">PublishedAt</option>
+        </select>
       </div>
       <div class="text-center text-lg py-2 gap-3">
         {{ result }} Articles Found
@@ -53,13 +59,13 @@ import { ref, onMounted } from "vue";
 
 const props = defineProps({ result: Number });
 const emit = defineEmits(["load"]);
-
 const textData = ref("bitcoin");
 const selected = ref("en");
+const sortby = ref("publishedAt");
 const date = ref();
 
 function submit() {
-  emit("load", textData, date, selected);
+  emit("load", textData, date, selected, sortby);
 }
 
 onMounted(() => {

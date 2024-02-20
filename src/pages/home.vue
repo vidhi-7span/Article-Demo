@@ -90,10 +90,11 @@ const openModal = (item) => {
 const getDetails = async (
   search = "bitcoin",
   lang = "en",
+  role = "publishedAt",
   date = dateRange.value
 ) => {
   const response = await axios.get(
-    `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&language=${lang}&pageSize=9&apiKey=984c6ffd475b4137bce0a7670278e3eb`
+    `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&language=${lang}&sortBy=${role}&pageSize=9&apiKey=984c6ffd475b4137bce0a7670278e3eb`
   );
   if (response.data && response.data.status == "ok") {
     totalResults.value = response.data.totalResults;
@@ -109,12 +110,11 @@ setTimeout(() => {
   getDetails();
 }, 2000);
 
-const loadArticles = (search, date, lang) => {
-  console.log(search.value, date.value, lang.value);
+const loadArticles = (search, date, lang, rele) => {
   isLoading.value = true;
   articles.value = [];
   dateRange.value = [formatDate(date.value[0]), formatDate(date.value[1])];
-  getDetails(search.value, lang.value);
+  getDetails(search.value, lang.value, rele.value);
 };
 // Load More Functionality
 
