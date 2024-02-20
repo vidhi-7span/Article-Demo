@@ -14,7 +14,7 @@
       <!-- {{ articles }} -->
       <div
         class="flex-shrink max-w-full w-full px-3 pb-3 pt-3 sm:pt-0 border-b-2 sm:border-b-0 border-dotted rounded-md border-gray-100 shadow-md"
-        v-for="(article, i) in articles.slice(0, articlestoShow)"
+        v-for="(article, i) in articles"
         :key="i"
       >
         <div class="flex flex-row sm:block hover-img">
@@ -45,10 +45,10 @@
       </div>
     </div>
     <div v-else>Data Not Found</div>
-    <div v-if="!isLoading && articles.length > articlestoShow">
+    <div v-if="!isLoading">
       <button
         @click="loadMore"
-        class="py-2 px-4 rounded-md bg-black text-white"
+        class="my-4 py-4 px-8 text-xl rounded-md bg-slate-600 text-white"
       >
         Load More
       </button>
@@ -71,9 +71,9 @@ const formatDate = (data) => {
 
 const articles = ref([]);
 const isLoading = ref(true);
-const articlestoShow = ref(9);
 const modalDetail = ref(null);
 const totalResults = ref(0);
+const currentPage = ref(1);
 
 const dateRange = ref([
   formatDate(new Date()),
@@ -88,17 +88,25 @@ const openModal = (item) => {
 
 // Data Liasting Functionality
 const getDetails = async (
+  isLoadingMore = false,
   search = "bitcoin",
   lang = "en",
   role = "publishedAt",
   date = dateRange.value
 ) => {
   const response = await axios.get(
-    `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&language=${lang}&sortBy=${role}&pageSize=9&apiKey=984c6ffd475b4137bce0a7670278e3eb`
+    `https://newsapi.org/v2/everything?q=${search}&from=${date[0]}&to=${date[1]}&language=${lang}&sortBy=${role}&pageSize=9&page=${currentPage.value}&apiKey=984c6ffd475b4137bce0a7670278e3eb`
   );
   if (response.data && response.data.status == "ok") {
     totalResults.value = response.data.totalResults;
-    articles.value = response.data.articles;
+    if (isLoadingMore) {
+      console.log(response.data.articles);
+      articles.value.push(...response.data.articles);
+      console.log(articles.value);
+    } else {
+      console.log("Else");
+      articles.value = response.data.articles;
+    }
     isLoading.value = false;
   } else {
     console.error("Error");
@@ -114,11 +122,12 @@ const loadArticles = (search, date, lang, rele) => {
   isLoading.value = true;
   articles.value = [];
   dateRange.value = [formatDate(date.value[0]), formatDate(date.value[1])];
-  getDetails(search.value, lang.value, rele.value);
+  getDetails(false, search.value, lang.value, rele.value);
 };
 // Load More Functionality
 
 const loadMore = () => {
-  articlestoShow.value = articlestoShow.value + 9;
+  currentPage.value = currentPage.value + 1;
+  getDetails(true);
 };
 </script>
