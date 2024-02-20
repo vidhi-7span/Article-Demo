@@ -4,7 +4,7 @@
   <div class="flex items-center justify-center overflow-hidden flex-col">
     <div v-if="isLoading">
       <div
-        class="h-10 w-10 bg-gradient-to-r from-cyan-500 my-24 to-red-500 animate-spin rounded-full flex items-center justify-center"
+        class="h-10 w-10 bg-gradient-to-r from-cyan-400 my-24 to-slate-700 animate-spin rounded-full flex items-center justify-center"
       >
         <div class="bg-white h-7 w-7 rounded-full"></div>
       </div>
@@ -48,7 +48,7 @@
     <div v-if="!isLoading">
       <button
         @click="loadMore"
-        class="my-4 py-4 px-8 text-xl rounded-md bg-slate-600 text-white"
+        class="my-4 py-3 px-6 text-lg rounded-md bg-slate-600 text-white font-semibold"
       >
         Load More
       </button>
@@ -100,11 +100,8 @@ const getDetails = async (
   if (response.data && response.data.status == "ok") {
     totalResults.value = response.data.totalResults;
     if (isLoadingMore) {
-      console.log(response.data.articles);
       articles.value.push(...response.data.articles);
-      console.log(articles.value);
     } else {
-      console.log("Else");
       articles.value = response.data.articles;
     }
     isLoading.value = false;
